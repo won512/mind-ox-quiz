@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>마음건강 OX 퀴즈</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:"Noto Sans KR","Malgun Gothic",sans-serif;background:#f5f7fb;color:#222;min-height:100vh;overflow:hidden}
+.screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
+.card{width:min(1100px,100%);min-height:620px;background:white;border-radius:32px;padding:48px 56px;box-shadow:0 12px 40px rgba(0,0,0,.08);display:flex;flex-direction:column}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:35px}
+.badge{font-size:22px;font-weight:800;padding:10px 20px;border-radius:999px;background:#eef2ff;color:#4f46e5}
+.progress{font-size:20px;color:#777;font-weight:700}
+.question{font-size:38px;line-height:1.45;font-weight:800;text-align:center;margin:20px auto 45px;max-width:900px;flex:1;display:flex;align-items:center;justify-content:center;word-break:keep-all;overflow-wrap:normal;white-space:normal}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.answer{border:0;border-radius:24px;padding:28px;font-size:42px;font-weight:900;cursor:pointer;min-height:130px;background:#f3f4f6;transition:.15s}
+.answer:active{transform:scale(.97)}
+.o{background:#fff0f0;color:#e24a4a}
+.x{background:#eef4ff;color:#4277d8}
+.answer:disabled{opacity:1;cursor:default}
+.feedback{display:none;text-align:center;flex-direction:column;align-items:center;justify-content:center;flex:1}
+.result-title{font-size:52px;font-weight:900;margin:10px 0 22px}
+.result-title.correct{color:#2f9e44}
+.result-title.wrong{color:#e03131}
+.explain{font-size:28px;line-height:1.6;max-width:850px;background:#f8f9fa;border-radius:22px;padding:28px 35px}
+.help-info{margin-top:18px;padding:18px 28px;border-radius:18px;background:#fff7e6;color:#555;font-size:20px;line-height:1.7;text-align:left;max-width:850px;width:100%}
+.help-title{font-size:22px;font-weight:900;color:#333;margin-bottom:8px}
+.help-subtitle{font-size:21px;font-weight:900;color:#333;margin:4px 0 2px}
+.help-info strong{color:#333}
+.institution-title{margin-top:14px;margin-bottom:3px}
+.next{margin-top:28px;border:0;border-radius:18px;background:#222;color:#fff;font-size:25px;font-weight:800;padding:20px 45px;cursor:pointer}
+.start{text-align:center;align-items:center;justify-content:center}
+.start h1{font-size:54px;margin:0 0 18px}
+.start p{font-size:25px;color:#666;line-height:1.6}
+.start button{margin-top:30px;border:0;border-radius:20px;background:#4f46e5;color:white;font-size:28px;font-weight:800;padding:22px 55px;cursor:pointer}
+.final{text-align:center;align-items:center;justify-content:center}
+.final h1{font-size:55px;margin:0 0 20px}
+.score{font-size:35px;font-weight:800;margin:20px}
+.restart{border:0;border-radius:18px;background:#4f46e5;color:#fff;font-size:25px;font-weight:800;padding:20px 45px;cursor:pointer}
+@media(max-width:700px){
+.card{padding:30px 22px;min-height:90vh;border-radius:22px}
+.question{font-size:28px;margin:10px auto 30px}
+.answers{gap:12px}
+.answer{font-size:34px;min-height:100px}
+.result-title{font-size:40px}.explain{font-size:21px;padding:22px}
+.start h1,.final h1{font-size:40px}
+}
+</style>
+</head>
+<body>
+<div class="screen">
+  <div class="card start" id="start">
+    <div class="badge">청도군정신건강복지센터</div>
+    <h1>마음건강 OX 퀴즈</h1>
+    <p>문제를 읽고 O 또는 X를<br>화면에서 직접 터치해 주세요!</p>
+    <button onclick="startQuiz()">퀴즈 시작하기</button>
+  </div>
+
+  <div class="card" id="quiz" style="display:none">
+    <div class="header">
+      <div class="badge">마음건강 OX 퀴즈</div>
+      <div class="progress" id="progress"></div>
+    </div>
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers">
+      <button class="answer o" onclick="answer(true)">O</button>
+      <button class="answer x" onclick="answer(false)">X</button>
+    </div>
+    <div class="feedback" id="feedback">
+      <div class="result-title" id="resultTitle"></div>
+      <div class="explain" id="explain"></div>
+      <div class="help-info" id="helpInfo" style="display:none">
+        <div class="help-subtitle">도움이 필요할 때</div>
+        <div>24시간 정신건강 상담전화 <strong>1577-0199</strong></div>
+        <div>24시간 자살예방 상담전화 <strong>109</strong></div>
+        <div>24시간 자살예방 SNS 상담 <strong>'마들랜'</strong></div>
+        <div class="help-subtitle institution-title">도움 받을 수 있는 기관</div>
+        <div>정신건강복지센터</div>
+        <div>청소년상담복지센터</div>
+        <div>Wee클래스, Wee센터</div>
+      </div>
+      <button class="next" onclick="nextQuestion()">다음 문제</button>
+    </div>
+  </div>
+
+  <div class="card final" id="final" style="display:none">
+    <h1>퀴즈가 끝났습니다!</h1>
+    <div class="score" id="score"></div>
+    <p style="font-size:24px;color:#666">생명과 마음을 소중히 하는 작은 실천,<br>오늘부터 함께 시작해요.</p>
+    <button class="restart" onclick="restart()">다시 시작하기</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q:"힘든 일이 있을 때 주변 사람에게 도움을 요청하는 것은 자살예방에 도움이 된다.",
+    a:true,
+    e:"정답은 O입니다. 힘든 상황을 혼자 감당하기보다 믿을 수 있는 사람에게 도움을 요청하고 필요한 경우 전문기관과 연결하는 것이 중요합니다."
+  },
+  {
+    q:"우울하거나 힘든 마음은 의지가 약해서 생기는 것이므로 스스로 참아내는 것이 가장 좋다.",
+    a:false,
+    e:"정답은 X입니다. 정신건강의 어려움은 단순히 의지의 문제가 아닙니다. 혼자 참기보다 주변 사람이나 전문가에게 도움을 요청할 수 있습니다."
+  },
+  {
+    q:"자살에 대해 직접 물어보면 오히려 자살 생각을 하게 만들 수 있으므로 묻지 않는 것이 좋다.",
+    a:false,
+    e:"정답은 X입니다. 자살 생각이 있는지 직접적이고 차분하게 묻는 것은 상대방의 어려움을 확인하고 도움을 연결하는 데 도움이 될 수 있습니다."
+  },
+  {
+    q:"평소와 달리 갑자기 주변 사람들과 연락을 끊거나 관계를 정리하는 모습은 주의 깊게 살펴볼 수 있는 변화이다.",
+    a:true,
+    e:"정답은 O입니다. 갑작스러운 관계 정리나 사회적 고립 등 평소와 다른 행동 변화가 나타난다면 관심을 가지고 대화를 시도해 볼 수 있습니다."
+  },
+  {
+    q:"정신건강 문제는 누구에게나 생길 수 있다.",
+    a:true,
+    e:"정답은 O입니다. 정신건강의 어려움은 특정한 사람에게만 나타나는 것이 아니라 누구에게나 생길 수 있습니다."
+  },
+  {
+    q:"자살위기 상황에서는 혼자 해결하려고 하기보다 주변 사람과 전문기관의 도움을 받는 것이 중요하다.",
+    a:true,
+    e:"정답은 O입니다. 위기 상황에서는 혼자 감당하지 않고 주변의 도움을 받고 필요한 전문적인 지원과 연결되는 것이 중요합니다."
+  },
+  {
+    q:"힘든 사람에게 '그 정도 일로 왜 그래?'라고 말하는 것은 위로가 될 수 있다.",
+    a:false,
+    e:"정답은 X입니다. 상대방의 어려움을 축소하거나 판단하기보다 '많이 힘들었겠다'처럼 감정을 인정하고 이야기를 들어주는 것이 도움이 됩니다."
+  },
+  {
+    q:"정신건강을 위해서는 충분한 휴식과 규칙적인 생활을 유지하는 것도 중요하다.",
+    a:true,
+    e:"정답은 O입니다. 규칙적인 수면과 식사, 적절한 활동과 휴식 등 기본적인 생활습관을 관리하는 것은 정신건강을 돌보는 데 도움이 됩니다."
+  },
+  {
+    q:"자살위험이 걱정되는 사람에게는 비밀을 지켜주겠다고 약속하는 것이 가장 중요하다.",
+    a:false,
+    e:"정답은 X입니다. 안전이 우선입니다. 자살위험이 높다고 판단되면 혼자 비밀로 간직하기보다 믿을 수 있는 보호자나 전문기관의 도움을 연결하는 것이 필요합니다."
+  },
+  {
+    q:"주변 사람이 평소와 다르게 힘들어 보인다면 먼저 관심을 표현하고 이야기를 들어주는 것부터 시작할 수 있다.",
+    a:true,
+    e:"정답은 O입니다. '요즘 괜찮아?'처럼 먼저 관심을 표현하고 판단하지 않고 이야기를 들어주는 것만으로도 도움의 첫걸음이 될 수 있습니다."
+  }
+];
+
+let current=0, score=0, answered=false;
+
+function startQuiz(){
+  document.getElementById("start").style.display="none";
+  document.getElementById("final").style.display="none";
+  document.getElementById("quiz").style.display="flex";
+  current=0; score=0; answered=false; render();
+}
+function render(){
+  answered=false;
+  document.getElementById("progress").textContent=`${current+1} / ${questions.length}`;
+  document.getElementById("question").textContent=questions[current].q;
+  document.getElementById("answers").style.display="grid";
+  document.getElementById("feedback").style.display="none";
+  document.querySelectorAll(".answer").forEach(b=>b.disabled=false);
+}
+function answer(value){
+  if(answered) return;
+  answered=true;
+  const item=questions[current];
+  if(value===item.a) score++;
+  document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+  document.getElementById("answers").style.display="none";
+  const title=document.getElementById("resultTitle");
+  title.textContent=value===item.a ? "정답입니다!" : "아쉬워요!";
+  title.className="result-title "+(value===item.a?"correct":"wrong");
+  document.getElementById("explain").textContent=item.e;
+  const helpInfo = document.getElementById("helpInfo");
+  const needsHelp = /전문기관|전문적인 지원|도움을 받|도움을 요청|도움이 필요|연결/.test(item.e);
+  helpInfo.style.display = needsHelp ? "block" : "none";
+  document.getElementById("feedback").style.display="flex";
+}
+function nextQuestion(){
+  current++;
+  if(current>=questions.length){
+    document.getElementById("quiz").style.display="none";
+    document.getElementById("final").style.display="flex";
+    document.getElementById("score").textContent=`10문제 중 ${score}문제 정답`;
+  }else render();
+}
+function restart(){ startQuiz(); }
+</script>
+</body>
+</html>
